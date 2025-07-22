@@ -1,0 +1,19 @@
+{
+  "generator-ui5-flp-plugin": {
+    "projectname": "plugin",
+    "namespace": "plugin",
+    "framework": "SAPUI5",
+    "frameworkVersion": "1.138.0",
+    "features": [],
+    "author": "Daviti Oghiashvili",
+    "initrepo": false,
+    "appId": "plugin",
+    "appURI": "plugin",
+    "cdnDomain": "ui5.sap.com",
+    "defaultTheme": "sap_horizon",
+    "qunitCoverageFile": "qunit-coverage-istanbul.js",
+    "gte1_98_0": true,
+    "gte1_104_0": true,
+    "setupCompleted": true
+  }
+}
