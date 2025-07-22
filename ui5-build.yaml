@@ -1,0 +1,13 @@
+specVersion: '3.1'
+metadata:
+  name: plugin
+type: application
+
+builder:
+  customTasks:
+    - name: ui5-task-zipper
+      afterTask: generateCachebusterInfo
+      configuration:
+        archiveName: plugin
+        additionalFiles:
+          - xs-app.json
