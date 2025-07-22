@@ -1,6 +1,8 @@
 # build results
 dist
 coverage
+mta_archives
+resources
 
 # Logs
 logs

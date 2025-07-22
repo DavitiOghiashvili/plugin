@@ -54,7 +54,7 @@ modules:
       builder: custom
       commands:
         - npm install
-        - npm run build:ui
+        - npm run build
       supported-platforms: []
 resources:
   - name: plugin-destination-service
