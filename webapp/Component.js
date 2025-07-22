@@ -1,73 +1,98 @@
 sap.ui.define([
 	"sap/ui/core/Component",
-	"sap/base/util/ObjectPath",
 	"sap/m/Button",
-	"sap/m/Bar",
-	"sap/m/MessageToast"
-], function (Component, ObjectPath, Button, Bar, MessageToast) {
+	"sap/m/MessageToast",
+	"sap/ui/core/Fragment"
+], function (Component, Button, MessageToast, Fragment) {
 
 	return Component.extend("plugin.Component", {
 
 		metadata: {
-			"manifest": "json"
+			manifest: "json",
 		},
 
 		init: function () {
-			var rendererPromise = this._getRenderer();
-			var oResourceBundle = this.getModel("i18n").getResourceBundle();
+			let rendererPromise = this._getRendererAsync();
+			let oResourceBundle = this.getModel("i18n").getResourceBundle();
 
-			// This is example code. Please replace with your implementation!
-
-
-
-		},
-
-		/**
-		 * Returns the shell renderer instance in a reliable way,
-		 * i.e. independent from the initialization time of the plug-in.
-		 * This means that the current renderer is returned immediately, if it
-		 * is already created (plug-in is loaded after renderer creation) or it
-		 * listens to the &quot;rendererCreated&quot; event (plug-in is loaded
-		 * before the renderer is created).
-		 *
-		 *  @returns {Promise} a Promise which will resolve with the renderer instance, 
-		 * 					   or be rejected with an error message.
-		 */
-		_getRenderer: function () {
-			return new Promise(function(fnResolve, fnReject) {
-				this._oShellContainer = ObjectPath.get("sap.ushell.Container");
-				if (!this._oShellContainer) {
-					fnReject(
-						"Illegal state: shell container not available; this component must be executed in a unified shell runtime context."
-					);
-				} else {
-					var oRenderer = this._oShellContainer.getRenderer();
-					if (oRenderer) {
-						fnResolve(oRenderer);
-					} else {
-						// renderer not initialized yet, listen to rendererCreated event
-						this._onRendererCreated = function(oEvent) {
-							oRenderer = oEvent.getParameter("renderer");
-							if (oRenderer) {
-								fnResolve(oRenderer);
-							} else {
-								fnReject(
-									"Illegal state: shell renderer not available after receiving 'rendererLoaded' event."
-								);
-							}
-						};
-						this._oShellContainer.attachRendererCreatedEvent(
-							this._onRendererCreated
-						);
+			rendererPromise.then(function (oRenderer) {
+				// Add Toast Button
+				let oToastButton = new Button({
+					text: oResourceBundle.getText("toastButtonText", "Show Toast"),
+					press: function () {
+						MessageToast.show("Hello from the plugin!");
 					}
-				}
+				});
+
+				// Add Fragment Button
+				let oFragmentButton = new Button({
+					text: oResourceBundle.getText("fragmentButtonText", "Show Dialog"),
+					press: this._openFragmentDialog.bind(this)
+				});
+
+				// Extend shell header with buttons
+				oRenderer.addHeaderEndItem("sapUshellShellHeadItem", {
+					id: "toastButton",
+					control: oToastButton
+				}, true, false);
+
+				oRenderer.addHeaderEndItem("sapUshellShellHeadItem", {
+					id: "fragmentButton",
+					control: oFragmentButton
+				}, true, false);
 			}.bind(this));
 		},
 
-		exit: function () {
-		    if (this._oShellContainer && this._onRendererCreated) {
-			this._oShellContainer.detachRendererCreatedEvent(this._onRendererCreated);
-		    }
-		}
+		_openFragmentDialog: function () {
+			if (!this._oDialog) {
+				Fragment.load({
+					name: "plugin.view.fragments.Dialog",
+					controller: this
+				}).then(function (oDialog) {
+					this._oDialog = oDialog;
+					this._oDialog.open();
+				}.bind(this));
+			} else {
+				this._oDialog.open();
+			}
+		},
+
+		onCloseDialog: function () {
+			this._oDialog.close();
+		},
+
+       /**
+       * @private
+       * @return {Promise<sap.ushell.renderers.fiori2.Renderer>}
+       */
+		_getRendererAsync() {
+			return new Promise((fnResolve, fnReject) => {
+				const vShell = sap.ushell?.Container
+
+				if (!vShell) {
+					fnReject(
+						'Illegal state: shell container not available; this component must be executed in a unified shell runtime context.'
+					)
+				}
+
+				const vRenderer = vShell.getRenderer()
+
+				if (vRenderer) {
+					return fnResolve(vRenderer)
+				}
+
+				vShell.attachRendererCreatedEvent((oEvent) => {
+					const vCreatedRenderer = oEvent.getParameter('renderer')
+
+					if (vCreatedRenderer) {
+						fnResolve(vCreatedRenderer)
+					}
+
+					fnReject(
+						"Illegal state: shell renderer not available after receiving 'rendererLoaded' event."
+					)
+				})
+			})
+		},
 	});
 });
