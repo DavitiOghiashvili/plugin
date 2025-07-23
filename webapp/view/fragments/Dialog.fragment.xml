@@ -16,7 +16,7 @@
                 press="onListItemPress" />
         </List>
         <beginButton>
-            <Button text="{i18n>CLOSE}"
+            <Button text="Close"
                 press="onCloseDialog" />
         </beginButton>
     </Dialog>
