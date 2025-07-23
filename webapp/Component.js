@@ -1,8 +1,9 @@
 sap.ui.define([
 	"sap/ui/core/Component",
 	"sap/ushell/ui/shell/ShellHeadItem",
-	"sap/m/MessageToast"
-], function (Component, ShellHeadItem, MessageToast) {
+	"sap/m/MessageToast",
+	"sap/m/MessageBox"
+], function (Component, ShellHeadItem, MessageToast, MessageBox) {
 	"use strict";
 
 	return Component.extend("plugin.Component", {
@@ -44,7 +45,7 @@ sap.ui.define([
 					const sAppId = oComponentInstance?.getId();
 
 					if (sAppId && sAppId !== '__renderer0---Shell-home-component') {
-						MessageToast.show(oBundle.getText("openedApp") + `${sAppId}`);
+						MessageBox.information(oBundle.getText("openedApp") + `${sAppId}`);
 					} else {
 						MessageToast.show(oBundle.getText("Hello"));
 					}

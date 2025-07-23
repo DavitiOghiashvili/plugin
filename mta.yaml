@@ -1,7 +1,34 @@
-_schema-version: '3.2'
+_schema-version: "3.1"
 ID: plugin
 version: 0.0.1
+
 modules:
+  - name: plugin
+    type: html5
+    path: .
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build
+      supported-platforms: []
+
+  - name: plugin-app-content
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: plugin-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - name: plugin
+          artifacts:
+            - plugin.zip
+          target-path: resources/
+
   - name: plugin-destination-content
     type: com.sap.application.content
     requires:
@@ -24,38 +51,15 @@ modules:
               ServiceInstanceName: plugin-html5-srv
               ServiceKeyName: plugin-repo-host-key
               sap.cloud.service: plugin
-            - Authentication: OAuth2UserTokenExchange
-              Name: plugin_uaa
-              ServiceInstanceName: plugin-xsuaa-srv
+            - Name: plugin-uaa
+              Authentication: OAuth2UserTokenExchange
+              ServiceInstanceName: plugin-xsuaa-service
               ServiceKeyName: plugin-uaa-key
               sap.cloud.service: plugin
           existing_destinations_policy: ignore
     build-parameters:
       no-source: true
-  - name: plugin-app-content
-    type: com.sap.application.content
-    path: .
-    requires:
-      - name: plugin-repo-host
-        parameters:
-          content-target: true
-    build-parameters:
-      build-result: resources
-      requires:
-        - artifacts:
-            - plugin.zip
-          name: plugin
-          target-path: resources/
-  - name: plugin
-    type: html5
-    path: .
-    build-parameters:
-      build-result: dist
-      builder: custom
-      commands:
-        - npm install
-        - npm run build
-      supported-platforms: []
+
 resources:
   - name: plugin-destination-service
     type: org.cloudfoundry.managed-service
@@ -65,29 +69,33 @@ resources:
         init_data:
           instance:
             destinations:
-              - Authentication: NoAuthentication
-                Name: ui5
+              - Name: ui5
+                Authentication: NoAuthentication
                 ProxyType: Internet
                 Type: HTTP
                 URL: https://ui5.sap.com
+                HTML5.DynamicDestination: true
             existing_destinations_policy: update
         version: 1.0.0
       service: destination
       service-name: plugin-destination-service
       service-plan: lite
+
   - name: plugin-uaa
     type: org.cloudfoundry.managed-service
     parameters:
       path: ./xs-security.json
       service: xsuaa
-      service-name: plugin-xsuaa-srv
+      service-name: plugin-xsuaa-service
       service-plan: application
+
   - name: plugin-repo-host
     type: org.cloudfoundry.managed-service
     parameters:
       service: html5-apps-repo
       service-name: plugin-html5-srv
       service-plan: app-host
+
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true
