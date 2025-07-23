@@ -38,7 +38,9 @@ sap.ui.define([
 				// Add buttons to the shell header
 				oRenderer.addHeaderEndItem("sapUshellShellHeadItem", { id: "toastButton", control: oToastButton }, true, false);
 				oRenderer.addHeaderEndItem("sapUshellShellHeadItem", { id: "fragmentButton", control: oFragmentButton }, true, false);
-			}).catch(oError => MessageToast.show("Error initializing plugin", oError));
+			}).catch(oError => MessageToast.show("Error initializing plugin", {
+				details: oError,
+			}));
 		},
 
 		/**
